@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
 
 CosimR provides the minimum implementation for co-simulation between external program (R,python or C/C++) and EnergyPlus through the SystemCommand Acotr of BCVTB. CosimR can help you to generate(copy), modify and save a xml file, which will be use in the co-simulation. Meanwhile, CosimR also provides a simple function to run the co-simulation through command line of BCVTB.
 
+<img src="inst/figs/xml.png"/>
+
+
 ## Installation
 
 You can install the development version of `CosimR` from Github by:

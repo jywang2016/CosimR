@@ -11,6 +11,8 @@ modify and save a xml file, which will be use in the co-simulation.
 Meanwhile, CosimR also provides a simple function to run the
 co-simulation through command line of BCVTB.
 
+<img src="inst/figs/xml.png"/>
+
 ## Installation
 
 You can install the development version of `CosimR` from Github by:
