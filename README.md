@@ -39,18 +39,13 @@ scripts according to your needs.
 
 ## Usage
 
-``` text
-
 The flowchart:
 
-         Step1:Copy                    Step2:Modify         Step3:save/write
-xml file =========>>> '.../CosimR.xml' =========>>>  xmlroot =========>>> '.../new.xml'
-         copy_xml()                    modify_xml()           write_xml()
+``` text
 
-
-Step4: run
-=========>>> result
-run_Cosim()
+         Step1:Copy                    Step2:Modify         Step3:save/write            Step4: run
+xml file =========>>> '.../CosimR.xml' =========>>>  xmlroot =========>>> '.../new.xml' =========>>> result
+         copy_xml()                    modify_xml()           write_xml()               run_Cosim()
 ```
 
 ### reproduce the schedule example
