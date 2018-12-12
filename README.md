@@ -1,8 +1,6 @@
 CosimR
 ================
 
-# CosimR
-
 > Generate,modify and save the xml file for co-simualtion between
 > external program (R,python or C/C++) and EnergyPlus through the BCVTB
 
@@ -41,6 +39,8 @@ scripts according to your needs.
 
 ``` text
 
+The flowchart:
+
          Step1:Copy                    Step2:Modify         Step3:save/write
 xml file =========>>> '.../CosimR.xml' =========>>>  xmlroot =========>>> '.../new.xml'
          copy_xml()                    modify_xml()           write_xml()
@@ -49,10 +49,6 @@ xml file =========>>> '.../CosimR.xml' =========>>>  xmlroot =========>>> '.../n
 Step4: run
 =========>>> result
 run_Cosim()
-```
-
-``` r
-library(CosimR)
 ```
 
 ### reproduce the schedule example
@@ -66,7 +62,12 @@ in the package. Therefore, just copy them to your target path.
 > provided in BCVTB.
 
 ``` r
+library(CosimR)
+```
+
+``` r
 # This xmlpath is my case. Change it according to your need.
+# The idf version is V8-5-0.
 xmlpath <- 'D:/bcvtb/examples/CosimRtest'
 file.copy(from = system.file("extdata/SmOffPSZ.idf", package = "CosimR"),
           to = xmlpath,
@@ -75,9 +76,6 @@ file.copy(from = system.file("extdata/variables.cfg", package = "CosimR"),
           to = xmlpath,
           overwrite = TRUE)
 ```
-
-**My EnergyPlus version is
-    V8-5-0.**
 
 ### Step1: Copy the xml
 
@@ -143,6 +141,8 @@ write_xml(rootnode = xmlroot,
 
     ## new.xml is written successfully!
 
+**Now, you can operate the new.xml by BCVTB.**
+
 ### Step4: run co-simulation (Optional)
 
 ``` r
@@ -152,3 +152,67 @@ run_Cosim(bcvtbpath = 'D:/bcvtb',
 ```
 
     ## Co-simulation ends. You can check the results inD:/bcvtb/examples/CosimRtest
+
+## Python
+
+Use this part to replace above corresponding code chunks.
+
+``` r
+xmlroot<- modify_xml(xmlpath = xmlpath,
+                     timeStep = 15*60, 
+                     beginTime = 3*24*3600,
+                     endTime = 4*24*3600,
+                     extractLength = 2,
+                     idf = paste0(xmlpath,'/SmOffPSZ.idf'),
+                     epw = 'D:/bcvtb/examples/ePlusWeather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw',
+                     outname = 'eplusout',
+                     programname = 'python',
+                     programArgs = 'Cosim.py',
+                     workingDir = paste0(xmlpath,'/python'),
+                     cpp = FALSE)
+file.copy(from = system.file("extdata/Cosim.py", package = "CosimR"),
+          to = paste0(xmlpath,'/python'),
+          overwrite = TRUE)
+```
+
+## C/C++
+
+Use this part to replace above corresponding code chunks.
+
+``` r
+xmlroot<- modify_xml(xmlpath = xmlpath,
+                     timeStep = 15*60,
+                     beginTime = 3*24*3600,
+                     endTime = 4*24*3600,
+                     extractLength = 2,
+                     idf = paste0(xmlpath,'/SmOffPSZ.idf'),
+                     epw = 'D:/bcvtb/examples/ePlusWeather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw',
+                     outname = 'eplusout',
+                     programname = 'D:/bcvtb/examples/CosimRtest/cpp/Cosim',
+                     programArgs = '',
+                     workingDir = paste0(xmlpath,'/cpp'),
+                     cpp = TRUE)
+
+#window user can use exe
+#linux and other OS user can compile the Cosim.cpp
+file.copy(from = system.file("extdata/Cosim.exe", package = "CosimR"),
+          to = paste0(xmlpath,'/cpp'),
+          overwrite = TRUE)
+```
+
+## Speed
+
+Run co-simulation for one-day in my windows 10 x64 system:
+
+``` txt
+exe(compiled by C++, 5.X secs) >  python(10.x secs) > R(28.x secs).
+```
+
+> Calling Rscript by SystemCommand spends much more time than python.
+
+## Author
+
+Jiangyu Wang
+
+*School of Energy and Power Engineering, Huazhong University of Science
+and Technology*

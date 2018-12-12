@@ -7,7 +7,6 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
 ```
 
-# CosimR
 
 > Generate,modify and save the xml file for co-simualtion between external program (R,python or C/C++) and EnergyPlus through the BCVTB
 
@@ -40,6 +39,8 @@ As for more diffcult operations, you need adjust your IDF and external scripts a
 
 ```text
 
+The flowchart:
+
          Step1:Copy                    Step2:Modify         Step3:save/write
 xml file =========>>> '.../CosimR.xml' =========>>>  xmlroot =========>>> '.../new.xml'
          copy_xml()                    modify_xml()           write_xml()
@@ -50,16 +51,15 @@ Step4: run
 run_Cosim()
 ```
 
-
-```{r,eval=TRUE}
-library(CosimR)
-```
-
 ### reproduce the schedule example
 
 We need prepare some files for co-simulation. All files have been placed in the package. Therefore, just copy them to your target path.
 
 > Note: All the file.copy operations are not necessary for co-simulation if you already have your own idf, cfg, R or python script,and so on. These copy is just for the reproduction of schedule example which is provided in BCVTB. 
+
+```{r,eval=TRUE}
+library(CosimR)
+```
 
 ```{r,echo=FALSE,eval=TRUE}
 xmlpath <- 'D:/bcvtb/examples/CosimRtest'
@@ -68,6 +68,7 @@ xmlpath <- 'D:/bcvtb/examples/CosimRtest'
 
 ```{r}
 # This xmlpath is my case. Change it according to your need.
+# The idf version is V8-5-0.
 xmlpath <- 'D:/bcvtb/examples/CosimRtest'
 file.copy(from = system.file("extdata/SmOffPSZ.idf", package = "CosimR"),
           to = xmlpath,
@@ -76,8 +77,6 @@ file.copy(from = system.file("extdata/variables.cfg", package = "CosimR"),
           to = xmlpath,
           overwrite = TRUE)
 ```
-
-**My EnergyPlus version is V8-5-0.**
 
 ### Step1: Copy the xml
 
@@ -134,7 +133,7 @@ Use this part to replace above corresponding code chunks.
 
 ```{r}
 xmlroot<- modify_xml(xmlpath = xmlpath,
-                     timeStep = 15*60, #写作'15*60'也是可以的哦
+                     timeStep = 15*60, 
                      beginTime = 3*24*3600,
                      endTime = 4*24*3600,
                      extractLength = 2,
@@ -156,7 +155,7 @@ Use this part to replace above corresponding code chunks.
 
 ```{r}
 xmlroot<- modify_xml(xmlpath = xmlpath,
-                     timeStep = 15*60, #写作'15*60'也是可以的哦
+                     timeStep = 15*60,
                      beginTime = 3*24*3600,
                      endTime = 4*24*3600,
                      extractLength = 2,
@@ -174,3 +173,18 @@ file.copy(from = system.file("extdata/Cosim.exe", package = "CosimR"),
           to = paste0(xmlpath,'/cpp'),
           overwrite = TRUE)
 ```
+
+## Speed
+
+Run co-simulation for one-day in my windows 10 x64 system:
+
+```txt
+exe(compiled by C++, 5.X secs) >  python(10.x secs) > R(28.x secs).
+```
+>Calling Rscript by SystemCommand spends much more time than python.
+
+## Author
+
+Jiangyu Wang
+
+*School of Energy and Power Engineering, Huazhong University of Science and Technology*
