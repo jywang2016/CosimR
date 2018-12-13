@@ -1,0 +1,159 @@
+---
+title: "Cosim of C++ and Eplus"
+---
+
+This document show how to specify the path of .exe(C++ application) and conduct co-simulation with EnergyPlus .
+
+## Here is the C++ code
+
+```cpp
+/*
+ This C++ script is the example of CosimR to show how to do co-simulation with EnergyPlus
+ The Code is messy because I'm not familiar with the C/C++. 
+ You can open a issue and point how to modify it or make it clean.
+ Package: CosimR
+ Github:	https://github.com/jywang2016/CosimR
+ Author: Jiangyu Wang
+ Date: 11th Dec, 2018
+ Email: jywang_2016@hust.edu.cn
+ Reference: schedule example in BCVTB
+ Compile: g++ -o Cosim Cosim.cpp -std=c++11
+ */
+#include <iostream>
+#include <string>
+#include <regex>
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
+
+int main(int argc, char *argv[]){
+  
+  string error = "the Number of arguments are not correct!";
+  if(argc !=4){
+    cout<<error<<endl;
+    return(1);
+  }
+  
+  smatch result;
+  string tempstr = argv[1];
+  
+  string regex_str("\\d+\\.?\\d*"); 
+  regex pat(regex_str,regex::icase);
+  
+  string::const_iterator iter = tempstr.begin();
+  string::const_iterator iterEnd= tempstr.end();
+  string strouttemp;
+  
+  if(regex_search(iter,iterEnd,result,pat)){
+    strouttemp = result[0]; //just need the first temperature info
+    //cout<<outdoortemp<<endl;
+  }
+  
+  int time;
+  char *strtime = (char *) argv[2];
+  time = atoi(strtime);
+  
+  float outtemp;
+  char *strtemp = (char *) strouttemp.c_str();
+  outtemp = atof(strtemp);
+  
+  // input const 
+  const int DAYSTART = 6*3600;
+  const int NIGHTSTART = 16*3600;
+  const double TCNIGHT = 30.0;
+  const double TCROOLOW = 22.0;
+  const double TCROOHIG = 26.0;
+  
+  const double TCOUTLOW = 20.0;
+  const double TCOUTHIG = 24.0;
+  
+  const double THDAY = 20.0;
+  const double THNIGHT = 16.0;
+  
+  // temp set logic 
+  
+  double ToutDif;
+  ToutDif = outtemp - TCOUTLOW;
+  
+  double TSetCooOn;
+  TSetCooOn = TCROOLOW + ToutDif * (TCROOHIG - TCROOLOW)/(TCOUTHIG - TCOUTLOW);
+  
+  double TCDay;
+  TCDay = max(TCROOLOW,min(TCROOHIG,TSetCooOn));
+  
+  double THSetPoi;
+  double TCSetPoi;
+  
+  int timeOfDay = time % 86400;
+  
+  if(timeOfDay > DAYSTART && timeOfDay < NIGHTSTART){
+    THSetPoi = THDAY;
+    TCSetPoi = TCDay;
+  }else{
+    THSetPoi = THNIGHT;
+    TCSetPoi = TCNIGHT;
+  }
+  
+  cout<<THSetPoi<<","<<TCSetPoi<<", "<<endl;
+  
+  return 0;
+}
+
+```
+Suppose the `Cosim.cpp` will be placed into the `cpp` folder under the `xmlpath = 'D:/bcvtb/examples/CosimRtest'`.
+If you are a R user with Rtools installed or Linux user, you can use `g++ -o Cosim Cosim.cpp -std=c++11` to compile your codes. Then, place the `Cosim.exe` file into the `./cpp` folder.
+
+## Co-simulation by using CosimR
+
+```{r}
+library(CosimR)
+```
+
+Step1: generate the .xml file
+
+```{r,eval=TRUE}
+xmlpath = 'D:/bcvtb/examples/CosimRtest'
+copy_xml(xmlpath = xmlpath)
+```
+
+Step2: modify the .xml file
+
+```{r}
+file.copy(from = system.file("extdata/Cosim.exe", package = "CosimR"),
+          to = paste0(xmlpath,'/cpp'),
+          overwrite = TRUE)
+
+xmlroot<- modify_xml(xmlpath = xmlpath,
+                     timeStep = 15*60, 
+                     beginTime = 3*24*3600,
+                     endTime = 4*24*3600,
+                     extractLength = 2,
+                     idf = paste0(xmlpath,'/SmOffPSZ.idf'),
+                     epw = 'D:/bcvtb/examples/ePlusWeather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw',
+                     outname = 'eplusout',
+                     programname = 'D:/bcvtb/examples/CosimRtest/cpp/Cosim',
+                     programArgs = '',
+                     workingDir = paste0(xmlpath,'/cpp'),
+                     cpp = TRUE)
+```
+
+Step3: save the .xml file
+
+```{r}
+write_xml(rootnode = xmlroot,
+          xmlpath = xmlpath,
+          output = 'new.xml')
+```
+
+Step4: run the .xml file
+
+```{r,eval=FALSE}
+run_Cosim(bcvtbpath = 'D:/bcvtb',
+          xmlpath = xmlpath,
+          output = 'new.xml')
+```
+
+## Add plotter in BCVTB manually
+
+Plotter block is not included in the .xml template file provided in the `CosimR` package. If you want see the results in real time, add plotter block in BCVTB manually is a good choice.

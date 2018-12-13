@@ -1,0 +1,118 @@
+---
+title: "Cosim of Python and Eplus"
+---
+
+This document show how to specify the path of python script and conduct co-simulation with EnergyPlus .
+
+## Here is the python code
+
+```python
+"""
+ 	This python script is the example of CosimR to show how to do co-simulation with EnergyPlus
+ 	Package: CosimR
+	Github:	https://github.com/jywang2016/CosimR
+	Author: Jiangyu Wang
+	Date: 11th Dec, 2018
+	Email: jywang_2016@hust.edu.cn
+	Reference: schedule example in BCVTB
+"""
+
+import re
+import sys
+
+string = sys.argv[1]
+time = sys.argv[2]
+iter = sys.argv[3]
+
+m = re.findall(r"\d+\.?\d*",string)
+
+tout = float(m[0])
+
+# input const -----------------------
+dayStart = 6*3600
+nightStart = 16*3600
+TCNight = 30
+TCRooLow = 22
+TCRooHig = 26
+
+TCOutLow = 20
+TCOutHig = 24
+
+THDay = 20
+THNight = 16
+
+# temp set logic ----------------------
+time = int(float(time))
+
+ToutDif = tout - TCOutLow
+
+TSetCooOn = TCRooLow + ToutDif * (TCRooHig - TCRooLow)/(TCOutHig - TCOutLow)
+TCDay = max(TCRooLow,min(TCRooHig,TSetCooOn))
+
+if time % 86400 > dayStart and time % 86400 < nightStart:
+	THSetPoi = THDay
+	TCSetPoi = TCDay
+else:
+	THSetPoi = THNight
+	TCSetPoi = TCNight
+
+strs = [str(THSetPoi),str(TCSetPoi),' ']
+
+sys.stdout.write(','.join(strs))
+
+```
+Suppose the python code `Cosim.py` will be placed into the `python` folder under the `xmlpath = 'D:/bcvtb/examples/CosimRtest'`.
+
+## Co-simulation by using CosimR
+
+```{r}
+library(CosimR)
+```
+
+Step1: generate the .xml file
+
+```{r,eval=TRUE}
+xmlpath = 'D:/bcvtb/examples/CosimRtest'
+copy_xml(xmlpath = xmlpath)
+```
+
+Step2: modify the .xml file
+
+```{r}
+file.copy(from = system.file("extdata/Cosim.py", package = "CosimR"),
+          to = paste0(xmlpath,'/python'),
+          overwrite = TRUE)
+
+xmlroot<- modify_xml(xmlpath = xmlpath,
+                     timeStep = 15*60, 
+                     beginTime = 3*24*3600,
+                     endTime = 4*24*3600,
+                     extractLength = 2,
+                     idf = paste0(xmlpath,'/SmOffPSZ.idf'),
+                     epw = 'D:/bcvtb/examples/ePlusWeather/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw',
+                     outname = 'eplusout',
+                     programname = 'python',
+                     programArgs = 'Cosim.py',
+                     workingDir = paste0(xmlpath,'/python'),
+                     cpp = FALSE)
+```
+
+Step3: save the .xml file
+
+```{r}
+write_xml(rootnode = xmlroot,
+          xmlpath = xmlpath,
+          output = 'new.xml')
+```
+
+Step4: run the .xml file
+
+```{r,eval=FALSE}
+run_Cosim(bcvtbpath = 'D:/bcvtb',
+          xmlpath = xmlpath,
+          output = 'new.xml')
+```
+
+## Add plotter in BCVTB manually
+
+Plotter block is not included in the .xml template file provided in the `CosimR` package. If you want see the results in real time, add plotter block in BCVTB manually is a good choice.
