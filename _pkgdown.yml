@@ -1,0 +1,11 @@
+reference:
+  - title: operate .xml file
+    desc: generate, modify and save .xml file
+    contents:
+      - copy_xml
+      - modify_xml
+      - write_xml
+  - title: run co-simulation
+    desc: run co-simulation through command line (BCVTB)
+    contents:
+      - run_Cosim
