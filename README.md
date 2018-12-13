@@ -7,11 +7,11 @@ CosimR
 CosimR provides the minimum implementation for co-simulation between
 external program (R,python or C/C++) and EnergyPlus through the
 SystemCommand Acotr of BCVTB. CosimR can help you to generate(copy),
-modify and save a xml file, which will be use in the co-simulation.
+modify and save a xml file, which will be used in the co-simulation.
 Meanwhile, CosimR also provides a simple function to run the
 co-simulation through command line of BCVTB.
 
-<img src="inst/figs/xml.png"/>
+<img src="man/figures/xml.png"/>
 
 ## Installation
 
@@ -150,9 +150,13 @@ run_Cosim(bcvtbpath = 'D:/bcvtb',
 
     ## Co-simulation ends. You can check the results inD:/bcvtb/examples/CosimRtest
 
-## Python
+## result
 
-Use this part to replace above corresponding code chunks.
+<img src="man/figures/result.gif" title="Results gif" alt="Results gif" style="display: block; margin: auto;" />
+
+## Python \[optional\]
+
+You can use this part to replace above corresponding R code chunks.
 
 ``` r
 xmlroot<- modify_xml(xmlpath = xmlpath,
@@ -172,7 +176,7 @@ file.copy(from = system.file("extdata/Cosim.py", package = "CosimR"),
           overwrite = TRUE)
 ```
 
-## C/C++
+## C/C++ \[optional\]
 
 Use this part to replace above corresponding code chunks.
 

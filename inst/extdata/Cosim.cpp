@@ -1,5 +1,7 @@
 /*
  This C++ script is the example of CosimR to show how to do co-simulation with EnergyPlus
+ The Code is messy because I'm not familiar with the C/C++. 
+ You can open a issue and point how to modify it or make it clean.
  Package: CosimR
  Github:	https://github.com/jywang2016/CosimR
  Author: Jiangyu Wang
